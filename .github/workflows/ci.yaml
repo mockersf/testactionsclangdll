@@ -10,46 +10,51 @@ on:
     #   - "[0-9]+.[0-9]+.[0-9]+*"
 
 jobs:
-  build_windows:
-    runs-on: windows-2019
+  # build_windows:
+  #   runs-on: windows-2019
+  #   steps:
+  #     - uses: actions/checkout@master
+  #     - name: Install llvm on Windows
+  #       shell: powershell
+  #       run: |
+  #         Invoke-Expression (New-Object System.Net.WebClient).DownloadString('https://get.scoop.sh')
+
+  #         scoop install llvm --global
+  #         $Env:Path
+  #         Get-ChildItem -Path C:\ProgramData\scoop\shims -Filter *llvm* -Recurse -ErrorAction SilentlyContinue -Force
+  #     - uses: actions-rs/cargo@v1
+  #       env:
+  #         LIBCLANG_PATH: C:\ProgramData\scoop\apps\llvm\current\bin
+  #       with:
+  #         command: build
+  #         args: --release --all-features
+  build:
+    runs-on: ${{ matrix.os.imageName }}
+    strategy:
+      matrix:
+        rust_toolchain: ["stable"]
+        os:
+          - imageName: ubuntu-18.04
+            target: x86_64-unknown-linux-gnu
+            profile: linux
+          - imageName: "macOS-latest"
+            target: x86_64-apple-darwin
+            profile: mac
     steps:
-      - uses: actions/checkout@master
-      - name: Install (Windows)
+      - uses: actions-rs/toolchain@v1
+        with:
+          toolchain: ${{ matrix.rust_toolchain }}
+          override: true
+      - name: Install llvm on Windows
+        if: runner.os == 'Windows'
         shell: powershell
         run: |
           Invoke-Expression (New-Object System.Net.WebClient).DownloadString('https://get.scoop.sh')
 
           scoop install llvm --global
-          $Env:Path
-          Get-ChildItem -Path C:\ProgramData\scoop\shims -Filter *llvm* -Recurse -ErrorAction SilentlyContinue -Force
-      - uses: actions-rs/cargo@v1
-        env:
-          LIBCLANG_PATH: C:\ProgramData\scoop\apps\llvm\current\bin
-        with:
-          command: build
-          args: --release --all-features
-  # build:
-  #   runs-on: ${{ matrix.os.imageName }}
-  #   strategy:
-  #     matrix:
-  #       rust_toolchain: ["stable"]
-  #       os:
-  #         - imageName: ubuntu-18.04
-  #           target: x86_64-unknown-linux-gnu
-  #           profile: linux
-  #         - imageName: "macOS-latest"
-  #           target: x86_64-apple-darwin
-  #           profile: mac
-  #   steps:
-  #     - uses: actions-rs/toolchain@v1
-  #       with:
-  #         toolchain: ${{ matrix.rust_toolchain }}
-  #         override: true
-  #     - uses: davidB/rust-cargo-make@v1
-  #     - uses: actions/checkout@v1
-  #     - name: Run tests
-  #       run: cargo make --profile ci-static-code-analysis-tasks --env TARGET=${{matrix.os.target}} ci-flow
-  #       env:
-  #         CARGO_MAKE_RUN_CODECOV: "true"
-  #         CARGO_MAKE_BUILD_EXAMPLES: "true"
-  #         CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
+
+          $Env:LIBCLANG_PATH = "C:\ProgramData\scoop\apps\llvm\current\bin";
+      - uses: davidB/rust-cargo-make@v1
+      - uses: actions/checkout@v1
+      - name: Run tests
+        run: cargo make --profile ci-static-code-analysis-tasks --env TARGET=${{matrix.os.target}} ci-flow
