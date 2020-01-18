@@ -11,7 +11,7 @@ on:
 
 jobs:
   build_windows:
-    runs-on: windows-2019
+    runs-on: windows-2019-clang
     steps:
       - uses: actions/checkout@master
       - uses: actions-rs/cargo@v1
