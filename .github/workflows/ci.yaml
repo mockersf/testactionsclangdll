@@ -10,6 +10,15 @@ on:
     #   - "[0-9]+.[0-9]+.[0-9]+*"
 
 jobs:
+  build_windows:
+    runs-on: windows-2019
+    steps:
+      - uses: actions/checkout@master
+      - uses: actions-rs/cargo@v1
+        with:
+          command: build
+          args: --release --all-features
+
   build:
     runs-on: ${{ matrix.os.imageName }}
     strategy:
@@ -22,9 +31,6 @@ jobs:
           - imageName: "macOS-latest"
             target: x86_64-apple-darwin
             profile: mac
-          - imageName: "windows-2019"
-            target: x86_64-pc-windows-msvc
-            profile: windows
 
     steps:
       - uses: actions-rs/toolchain@v1
