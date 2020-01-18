@@ -1,0 +1,14 @@
+[gd_scene load_steps=2 format=2]
+
+[ext_resource path="res://menu/Star.gdns" type="Script" id=1]
+
+[node name="Node2D" type="Node2D"]
+script = ExtResource( 1 )
+
+[node name="Star" type="ColorRect" parent="."]
+margin_right = 2.0
+margin_bottom = 2.0
+color = Color( 1, 1, 0.682353, 1 )
+
+[node name="VisibilityNotifier2D" type="VisibilityNotifier2D" parent="Star"]
+[connection signal="screen_exited" from="Star/VisibilityNotifier2D" to="." method="_on_VisibilityNotifier2D_screen_exited"]

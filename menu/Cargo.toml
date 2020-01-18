@@ -1,0 +1,15 @@
+[package]
+name = "menu"
+version = "0.1.0"
+authors = ["François Mockers <mockersf@gmail.com>"]
+edition = "2018"
+publish = false
+
+[lib]
+crate-type = ["cdylib"]
+
+[dependencies]
+# gdnative = "0.7"
+gdnative = { git = "https://github.com/GodotNativeTools/godot-rust" }
+euclid = "0.20"
+rand = "0.7.3"
