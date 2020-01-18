@@ -21,6 +21,9 @@ jobs:
 
           scoop install llvm --global
           $Env:Path
+          Get-ChildItem -Path C:\ -Filter clang.dll -Recurse -ErrorAction SilentlyContinue -Force
+          Get-ChildItem -Path C:\ -Filter libclang.dll -Recurse -ErrorAction SilentlyContinue -Force
+
       - uses: actions-rs/cargo@v1
         with:
           command: build
