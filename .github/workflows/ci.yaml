@@ -32,7 +32,7 @@ jobs:
     runs-on: ${{ matrix.os.imageName }}
     strategy:
       matrix:
-        rust_toolchain: ["stable"]
+        rust_toolchain: ["stable", "beta", "nightly"]
         os:
           - imageName: ubuntu-18.04
             target: x86_64-unknown-linux-gnu
@@ -53,10 +53,8 @@ jobs:
         shell: powershell
         run: |
           Invoke-Expression (New-Object System.Net.WebClient).DownloadString('https://get.scoop.sh')
-
           scoop install llvm --global
-
-          $Env:LIBCLANG_PATH = "C:\ProgramData\scoop\apps\llvm\current\bin";
+          ::set-env name=LIBCLANG_PATH::"C:\ProgramData\scoop\apps\llvm\current\bin"
       - uses: davidB/rust-cargo-make@v1
       - uses: actions/checkout@v1
       - name: Run tests
