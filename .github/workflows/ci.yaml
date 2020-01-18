@@ -11,9 +11,14 @@ on:
 
 jobs:
   build_windows:
-    runs-on: windows-2019-clang
+    runs-on: windows-2019
     steps:
       - uses: actions/checkout@master
+      - name: Install (Windows)
+         shell: powershell
+         run: |
+          scoop install llvm --global
+          $Env:Path
       - uses: actions-rs/cargo@v1
         with:
           command: build
