@@ -15,8 +15,8 @@ jobs:
     steps:
       - uses: actions/checkout@master
       - name: Install (Windows)
-         shell: powershell
-         run: |
+        shell: powershell
+        run: |
           scoop install llvm --global
           $Env:Path
       - uses: actions-rs/cargo@v1
