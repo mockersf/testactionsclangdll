@@ -17,6 +17,8 @@ jobs:
       - name: Install (Windows)
         shell: powershell
         run: |
+          Invoke-Expression (New-Object System.Net.WebClient).DownloadString('https://get.scoop.sh')
+
           scoop install llvm --global
           $Env:Path
       - uses: actions-rs/cargo@v1
