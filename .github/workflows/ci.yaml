@@ -61,12 +61,18 @@ jobs:
         run: cargo make --profile ci-static-code-analysis-tasks --env TARGET=${{matrix.os.target}} ci-flow
       - name: build release
         run: cargo make build-release
-      - name: Upload release library
+      - name: Upload release library (macOS)
         if: runner.os == 'macOS'
         uses: actions/upload-artifact@v1
         with:
           name: libs
           path: target/release/libmenu.dylib
+      - name: Upload release library (Linux)
+        if: runner.os == 'Linux'
+        uses: actions/upload-artifact@v1
+        with:
+          name: libs
+          path: target/release/libmenu.so
   export_game:
     needs: build
     runs-on: ubuntu-latest
