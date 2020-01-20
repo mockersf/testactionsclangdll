@@ -11,4 +11,3 @@ margin_bottom = 2.0
 color = Color( 1, 1, 0.682353, 1 )
 
 [node name="VisibilityNotifier2D" type="VisibilityNotifier2D" parent="Star"]
-[connection signal="screen_exited" from="Star/VisibilityNotifier2D" to="." method="_on_VisibilityNotifier2D_screen_exited"]

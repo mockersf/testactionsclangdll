@@ -62,3 +62,4 @@ margin_bottom = 428.0
 margin_right = 100.0
 margin_bottom = 20.0
 text = "New Game"
+[connection signal="pressed" from="Menu/MarginContainer2/Start" to="." method="go_to_game"]

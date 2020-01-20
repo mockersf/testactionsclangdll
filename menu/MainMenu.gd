@@ -34,3 +34,6 @@ func _process(delta):
 		get_node("Background/Stars").add_child(new_star)
 
 		nb_stars += 1
+
+func go_to_game():
+	get_tree().change_scene("res://game/Game.tscn")
