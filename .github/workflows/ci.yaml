@@ -10,7 +10,7 @@ on:
     #   - "[0-9]+.[0-9]+.[0-9]+*"
 
 jobs:
-  test:
+  tests:
     runs-on: ${{ matrix.os.imageName }}
     strategy:
       matrix:
@@ -114,7 +114,7 @@ jobs:
           name: libs
           path: target/release/libmenu.so
   nightly-export:
-    needs: nightly-build
+    needs: ["nightly-build", "tests"]
     runs-on: ubuntu-latest
     name: Export Game Job
     steps:
