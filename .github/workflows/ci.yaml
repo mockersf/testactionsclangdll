@@ -6,8 +6,6 @@ on:
     branches:
       - master
       - "releases/*"
-    # tags-ignore:
-    #   - "[0-9]+.[0-9]+.[0-9]+*"
 
 jobs:
   tests:
@@ -41,44 +39,6 @@ jobs:
       - uses: actions/checkout@v1
       - name: Run tests
         run: cargo make --profile ci-static-code-analysis-tasks --env TARGET=${{matrix.os.target}} ci-flow
-      # - name: build release
-      #   run: cargo make build-release
-      # - name: Upload release library (macOS)
-      #   if: runner.os == 'macOS'
-      #   uses: actions/upload-artifact@v1
-      #   with:
-      #     name: libs
-      #     path: target/release/libmenu.dylib
-      # - name: Upload release library (Linux)
-      #   if: runner.os == 'Linux'
-      #   uses: actions/upload-artifact@v1
-      #   with:
-      #     name: libs
-      #     path: target/release/libmenu.so
-  # export_game:
-  #   needs: build
-  #   runs-on: ubuntu-latest
-  #   name: Export Game Job
-  #   steps:
-  #     - name: checkout
-  #       uses: actions/checkout@v2.0.0
-  #     - name: Download libraries
-  #       uses: actions/download-artifact@v1
-  #       with:
-  #         name: libs
-  #     - shell: bash
-  #       run: |
-  #         mkdir -p target/release
-  #         mv libs/libmenu.dylib target/release/
-  #     - name: export game
-  #       uses: firebelley/godot-export@v1.0.1
-  #       with:
-  #         godot_executable_download_url: https://downloads.tuxfamily.org/godotengine/3.1.2/Godot_v3.1.2-stable_linux_headless.64.zip
-  #         godot_export_templates_download_url: https://downloads.tuxfamily.org/godotengine/3.1.2/Godot_v3.1.2-stable_export_templates.tpz
-  #         godot_template_version: 3.1.2.stable
-  #         relative_project_path: ./
-  #       env:
-  #         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
   nightly-build:
     runs-on: ${{ matrix.os.imageName }}
@@ -86,9 +46,6 @@ jobs:
       matrix:
         rust_toolchain: ["stable"]
         os:
-          - imageName: ubuntu-18.04
-            target: x86_64-unknown-linux-gnu
-            profile: linux
           - imageName: "macOS-latest"
             target: x86_64-apple-darwin
             profile: mac
@@ -107,12 +64,6 @@ jobs:
         with:
           name: libs
           path: target/release/libmenu.dylib
-      - name: Upload release library (Linux)
-        if: runner.os == 'Linux'
-        uses: actions/upload-artifact@v1
-        with:
-          name: libs
-          path: target/release/libmenu.so
   nightly-export:
     needs: ["nightly-build", "tests"]
     runs-on: ubuntu-latest
@@ -127,7 +78,7 @@ jobs:
       - shell: bash
         run: |
           mkdir -p target/release
-          mv libs/libmenu.dylib target/release/
+          mv libs/libmenu.* target/release/
       - name: export game
         uses: firebelley/godot-export@v1.0.1
         with:
@@ -137,3 +88,30 @@ jobs:
           relative_project_path: ./
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+  export-2:
+    needs: ["nightly-build", "tests"]
+    runs-on: ubuntu-latest
+    name: Export Game Job
+    steps:
+      - name: checkout
+        uses: actions/checkout@v2.0.0
+      - name: Download libraries
+        uses: actions/download-artifact@v1
+        with:
+          name: libs
+      - shell: bash
+        run: |
+          mkdir -p target/release
+          mv libs/libmenu.* target/release/
+      - name: Build
+        id: build
+        uses: josephbmanley/build-godot-action@releases/v1.3.1
+        with:
+          name: komarawii
+          preset: "Mac OSX"
+      - name: Build and Deploy
+        uses: JamesIves/github-pages-deploy-action@releases/v3
+        with:
+          ACCESS_TOKEN: ${{ secrets.ACCESS_TOKEN }}
+          BRANCH: gh-pages # The branch the action should deploy to.
+          FOLDER: build # The folder the action should deploy.
