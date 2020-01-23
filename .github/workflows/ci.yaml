@@ -17,12 +17,12 @@ jobs:
           - imageName: ubuntu-18.04
             target: x86_64-unknown-linux-gnu
             profile: linux
-          - imageName: "macOS-latest"
-            target: x86_64-apple-darwin
-            profile: mac
-          - imageName: "windows-2019"
-            target: x86_64-pc-windows-msvc
-            profile: windows
+          # - imageName: "macOS-latest"
+          #   target: x86_64-apple-darwin
+          #   profile: mac
+          # - imageName: "windows-2019"
+          #   target: x86_64-pc-windows-msvc
+          #   profile: windows
     steps:
       - uses: actions-rs/toolchain@v1
         with:
