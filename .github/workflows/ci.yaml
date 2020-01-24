@@ -108,7 +108,7 @@ jobs:
         uses: josephbmanley/build-godot-action@v1.3.1
         with:
           name: komarawii
-          preset: "Mac OSX"
+          preset: "MacOSX"
       - name: Build and Deploy
         uses: JamesIves/github-pages-deploy-action@releases/v3
         with:
