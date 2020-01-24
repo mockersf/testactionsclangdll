@@ -64,30 +64,30 @@ jobs:
         with:
           name: libs
           path: target/release/libmenu.dylib
-  nightly-export:
-    needs: ["nightly-build", "tests"]
-    runs-on: ubuntu-latest
-    name: Export Game Job
-    steps:
-      - name: checkout
-        uses: actions/checkout@v2.0.0
-      - name: Download libraries
-        uses: actions/download-artifact@v1
-        with:
-          name: libs
-      - shell: bash
-        run: |
-          mkdir -p target/release
-          mv libs/libmenu.* target/release/
-      - name: export game
-        uses: firebelley/godot-export@v1.0.1
-        with:
-          godot_executable_download_url: https://downloads.tuxfamily.org/godotengine/3.2/rc2/Godot_v3.2-rc2_linux_headless.64.zip
-          godot_export_templates_download_url: https://downloads.tuxfamily.org/godotengine/3.2/rc2/Godot_v3.2-rc2_export_templates.tpz
-          godot_template_version: 3.2.rc2
-          relative_project_path: ./
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+  # nightly-export:
+  #   needs: ["nightly-build", "tests"]
+  #   runs-on: ubuntu-latest
+  #   name: Export Game Job
+  #   steps:
+  #     - name: checkout
+  #       uses: actions/checkout@v2.0.0
+  #     - name: Download libraries
+  #       uses: actions/download-artifact@v1
+  #       with:
+  #         name: libs
+  #     - shell: bash
+  #       run: |
+  #         mkdir -p target/release
+  #         mv libs/libmenu.* target/release/
+  #     - name: export game
+  #       uses: firebelley/godot-export@v1.0.1
+  #       with:
+  #         godot_executable_download_url: https://downloads.tuxfamily.org/godotengine/3.2/rc2/Godot_v3.2-rc2_linux_headless.64.zip
+  #         godot_export_templates_download_url: https://downloads.tuxfamily.org/godotengine/3.2/rc2/Godot_v3.2-rc2_export_templates.tpz
+  #         godot_template_version: 3.2.rc2
+  #         relative_project_path: ./
+  #       env:
+  #         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
   export-2:
     needs: ["nightly-build", "tests"]
     runs-on: ubuntu-latest
@@ -109,6 +109,10 @@ jobs:
         with:
           name: komarawii
           preset: "MacOSX"
+          package: true
+      - shell: bash
+        run: |
+          ls -lrtha build
       - name: Build and Deploy
         uses: JamesIves/github-pages-deploy-action@releases/v3
         with:
