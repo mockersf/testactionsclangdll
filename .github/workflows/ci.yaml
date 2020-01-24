@@ -109,7 +109,6 @@ jobs:
         with:
           name: komarawii
           preset: "MacOSX"
-          package: true
       - shell: bash
         run: |
           ls -lrtha build
