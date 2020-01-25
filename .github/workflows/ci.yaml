@@ -108,6 +108,8 @@ jobs:
     runs-on: macOS-latest
     name: Fix and Release MacOS Nightly
     steps:
+      - name: checkout
+        uses: actions/checkout@v2.0.0
       - name: Download nightly macos build
         uses: actions/download-artifact@v1
         with:
