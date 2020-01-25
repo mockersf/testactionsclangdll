@@ -103,6 +103,7 @@ jobs:
         run: |
           mkdir -p target/release
           mv libs/libmenu.* target/release/
+          ls -lrtha target/release
       - name: Build
         id: build
         uses: josephbmanley/build-godot-action@v1.3.1
