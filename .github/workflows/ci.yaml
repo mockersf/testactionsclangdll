@@ -88,10 +88,10 @@ jobs:
   #         relative_project_path: ./
   #       env:
   #         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-  export-2:
+  nightly-export:
     needs: ["nightly-build", "tests"]
     runs-on: ubuntu-latest
-    name: Export Game Job
+    name: Export Nightly Release
     steps:
       - name: checkout
         uses: actions/checkout@v2.0.0
@@ -103,13 +103,16 @@ jobs:
         run: |
           mkdir -p target/release
           mv libs/libmenu.* target/release/
-          ls -lrtha target/release
-      - name: Build
-        id: build
-        uses: josephbmanley/build-godot-action@v1.3.1
+      - name: export game
+        uses: mockersf/godot-export@v1.0.1
         with:
-          name: komarawii
-          preset: "MacOSX"
+          godot_executable_download_url: https://downloads.tuxfamily.org/godotengine/3.2/rc2/Godot_v3.2-rc2_linux_headless.64.zip
+          godot_export_templates_download_url: https://downloads.tuxfamily.org/godotengine/3.2/rc2/Godot_v3.2-rc2_export_templates.tpz
+          godot_template_version: 3.2.rc2
+          relative_project_path: ./
+          create_release: false
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - shell: bash
         run: |
           ls -lrtha build
@@ -119,3 +122,35 @@ jobs:
           ACCESS_TOKEN: ${{ secrets.ACCESS_TOKEN }}
           BRANCH: gh-pages # The branch the action should deploy to.
           FOLDER: build # The folder the action should deploy.
+
+  # export-2:
+  #   needs: ["nightly-build", "tests"]
+  #   runs-on: ubuntu-latest
+  #   name: Export Game Job
+  #   steps:
+  #     - name: checkout
+  #       uses: actions/checkout@v2.0.0
+  #     - name: Download libraries
+  #       uses: actions/download-artifact@v1
+  #       with:
+  #         name: libs
+  #     - shell: bash
+  #       run: |
+  #         mkdir -p target/release
+  #         mv libs/libmenu.* target/release/
+  #         ls -lrtha target/release
+  #     - name: Build
+  #       id: build
+  #       uses: josephbmanley/build-godot-action@v1.3.1
+  #       with:
+  #         name: komarawii
+  #         preset: "MacOSX"
+  #     - shell: bash
+  #       run: |
+  #         ls -lrtha build
+  #     - name: Build and Deploy
+  #       uses: JamesIves/github-pages-deploy-action@releases/v3
+  #       with:
+  #         ACCESS_TOKEN: ${{ secrets.ACCESS_TOKEN }}
+  #         BRANCH: gh-pages # The branch the action should deploy to.
+  #         FOLDER: build # The folder the action should deploy.
