@@ -97,7 +97,7 @@ jobs:
           name: nightly-macos
           path: exports/MacOSX.zip
 
-  fix-nightly-macos-and-upload-s3:
+  fix-nightly-macos-dmg:
     needs: ["nightly-export"]
     runs-on: macOS-latest
     name: Fix and Release MacOS Nightly
@@ -118,8 +118,26 @@ jobs:
           chmod 755 Komarowii.app/Contents/MacOS/Komarowii
           cd ..
           mkdir out
+          date=`date "+%Y-%m-%d"`
           hdiutil create tmp.dmg -ov -volname "Komarowii" -fs HFS+ -srcfolder "tmp"
-          hdiutil convert tmp.dmg -format UDZO -o out/Komarowii.dmg
+          hdiutil convert tmp.dmg -format UDZO -o out/Komarowii-$date.dmg
+      - name: Upload nightly dmg build (macOS)
+        uses: actions/upload-artifact@v1
+        with:
+          name: nightly-macos-dmg
+          path: out/Komarowii*.dmg
+
+  upload-s3:
+    needs: ["fix-nightly-macos-dmg"]
+    runs-on: ubuntu-latest
+    name: Upload nightly to S3
+    steps:
+      - name: checkout
+        uses: actions/checkout@v2.0.0
+      - name: Download nightly macos build
+        uses: actions/download-artifact@v1
+        with:
+          name: nightly-macos-dmg
       - name: upload to s3
         uses: jakejarvis/s3-sync-action@master
         with:
@@ -129,4 +147,4 @@ jobs:
           AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
           AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           AWS_S3_ENDPOINT: ${{ secrets.AWS_S3_ENDPOINT }}
-          SOURCE_DIR: "out"
+          SOURCE_DIR: "nightly-macos-dmg"
