@@ -64,30 +64,7 @@ jobs:
         with:
           name: libs
           path: target/release/libmenu.dylib
-  # nightly-export:
-  #   needs: ["nightly-build", "tests"]
-  #   runs-on: ubuntu-latest
-  #   name: Export Game Job
-  #   steps:
-  #     - name: checkout
-  #       uses: actions/checkout@v2.0.0
-  #     - name: Download libraries
-  #       uses: actions/download-artifact@v1
-  #       with:
-  #         name: libs
-  #     - shell: bash
-  #       run: |
-  #         mkdir -p target/release
-  #         mv libs/libmenu.* target/release/
-  #     - name: export game
-  #       uses: firebelley/godot-export@v1.0.1
-  #       with:
-  #         godot_executable_download_url: https://downloads.tuxfamily.org/godotengine/3.2/rc2/Godot_v3.2-rc2_linux_headless.64.zip
-  #         godot_export_templates_download_url: https://downloads.tuxfamily.org/godotengine/3.2/rc2/Godot_v3.2-rc2_export_templates.tpz
-  #         godot_template_version: 3.2.rc2
-  #         relative_project_path: ./
-  #       env:
-  #         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
   nightly-export:
     needs: ["nightly-build", "tests"]
     runs-on: ubuntu-latest
@@ -114,48 +91,40 @@ jobs:
           create_release: false
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      - shell: bash
+      - name: Deploy
+        uses: JamesIves/github-pages-deploy-action@releases/v3
+        with:
+          BRANCH: gh-pages
+          FOLDER: exports
+      - name: Upload nightly build (macOS)
+        uses: actions/upload-artifact@v1
+        with:
+          name: nightly-macos
+          path: exports/MacOSX.zip
+
+  fix-nightly-macos:
+    needs: ["nightly-export"]
+    runs-on: macOS-latest
+    name: Fix and Release MacOS Nightly
+    steps:
+      - name: Download nightly macos build
+        uses: actions/download-artifact@v1
+        with:
+          name: nightly-macos
+      - name: Fix MacOSX export permissions and save as dmg
+        shell: bash
         run: |
-          pwd
-          echo "in current dir:"
-          ls -lrtha
-          echo "in exports:"
-          ls -lrtha exports
+          mkdir tmp
+          mv nightly-macos/MacOSX.zip tmp/
+          cd tmp
+          unzip MacOSX.zip
+          chmod 755 Komarowii.app/Contents/MacOS/Komarowii
+          cd ..
+          mkdir out
+          hdiutil create tmp.dmg -ov -volname "Komarowii" -fs HFS+ -srcfolder "tmp"
+          hdiutil convert tmp.dmg -format UDZO -o out/Komarowii.dmg
       - name: Build and Deploy
         uses: JamesIves/github-pages-deploy-action@releases/v3
         with:
-          ACCESS_TOKEN: ${{ secrets.ACCESS_TOKEN }}
-          BRANCH: gh-pages # The branch the action should deploy to.
-          FOLDER: exports # The folder the action should deploy.
-
-  # export-2:
-  #   needs: ["nightly-build", "tests"]
-  #   runs-on: ubuntu-latest
-  #   name: Export Game Job
-  #   steps:
-  #     - name: checkout
-  #       uses: actions/checkout@v2.0.0
-  #     - name: Download libraries
-  #       uses: actions/download-artifact@v1
-  #       with:
-  #         name: libs
-  #     - shell: bash
-  #       run: |
-  #         mkdir -p target/release
-  #         mv libs/libmenu.* target/release/
-  #         ls -lrtha target/release
-  #     - name: Build
-  #       id: build
-  #       uses: josephbmanley/build-godot-action@v1.3.1
-  #       with:
-  #         name: komarawii
-  #         preset: "MacOSX"
-  #     - shell: bash
-  #       run: |
-  #         ls -lrtha build
-  #     - name: Build and Deploy
-  #       uses: JamesIves/github-pages-deploy-action@releases/v3
-  #       with:
-  #         ACCESS_TOKEN: ${{ secrets.ACCESS_TOKEN }}
-  #         BRANCH: gh-pages # The branch the action should deploy to.
-  #         FOLDER: build # The folder the action should deploy.
+          BRANCH: gh-pages
+          FOLDER: out
