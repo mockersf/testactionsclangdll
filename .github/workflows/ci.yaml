@@ -120,7 +120,7 @@ jobs:
           mkdir tmp
           mv nightly-macos/MacOSX.zip tmp/
           cd tmp
-          unzip MacOSX.zip
+          unzip MacOSX.zip && rm MacOSX.zip
           chmod 755 Komarowii.app/Contents/MacOS/Komarowii
           cd ..
           mkdir out
