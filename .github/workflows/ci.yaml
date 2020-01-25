@@ -99,11 +99,12 @@ jobs:
         uses: actions/download-artifact@v1
         with:
           name: libs
-      - shell: bash
+      - name: Setup libraries in expected folder
+        shell: bash
         run: |
           mkdir -p target/release
           mv libs/libmenu.* target/release/
-      - name: export game
+      - name: Export Game
         uses: mockersf/godot-export@v1.0.2
         with:
           godot_executable_download_url: https://downloads.tuxfamily.org/godotengine/3.2/rc2/Godot_v3.2-rc2_linux_headless.64.zip
@@ -115,13 +116,17 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - shell: bash
         run: |
-          ls -lrtha build
+          pwd
+          echo "in current dir:"
+          ls -lrtha
+          echo "in builds:"
+          ls -lrtha builds
       - name: Build and Deploy
         uses: JamesIves/github-pages-deploy-action@releases/v3
         with:
           ACCESS_TOKEN: ${{ secrets.ACCESS_TOKEN }}
           BRANCH: gh-pages # The branch the action should deploy to.
-          FOLDER: build # The folder the action should deploy.
+          FOLDER: builds # The folder the action should deploy.
 
   # export-2:
   #   needs: ["nightly-build", "tests"]
