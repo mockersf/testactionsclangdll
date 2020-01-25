@@ -91,19 +91,13 @@ jobs:
           create_release: false
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      - name: Deploy
-        uses: JamesIves/github-pages-deploy-action@releases/v3
-        with:
-          ACCESS_TOKEN: ${{ secrets.ACCESS_TOKEN }}
-          BRANCH: gh-pages
-          FOLDER: exports
       - name: Upload nightly build (macOS)
         uses: actions/upload-artifact@v1
         with:
           name: nightly-macos
           path: exports/MacOSX.zip
 
-  fix-nightly-macos:
+  fix-nightly-macos-and-upload-s3:
     needs: ["nightly-export"]
     runs-on: macOS-latest
     name: Fix and Release MacOS Nightly
@@ -126,9 +120,12 @@ jobs:
           mkdir out
           hdiutil create tmp.dmg -ov -volname "Komarowii" -fs HFS+ -srcfolder "tmp"
           hdiutil convert tmp.dmg -format UDZO -o out/Komarowii.dmg
-      - name: Build and Deploy
-        uses: JamesIves/github-pages-deploy-action@releases/v3
-        with:
-          ACCESS_TOKEN: ${{ secrets.ACCESS_TOKEN }}
-          BRANCH: gh-pages
-          FOLDER: out
+    - uses: jakejarvis/s3-sync-action@master
+      with:
+        args: --acl public-read --delete
+      env:
+        AWS_S3_BUCKET: ${{ secrets.AWS_S3_BUCKET }}
+        AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+        AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+        AWS_S3_ENDPOINT	: ${{ secrets.AWS_S3_ENDPOINT }}
+        SOURCE_DIR: 'out' 
