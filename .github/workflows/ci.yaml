@@ -55,10 +55,10 @@ jobs:
           echo $GITHUB_SHA
           cat last-build
 
-          ::set-env name=last_build::`cat last-build`
+          ::set-env name=LAST_BUILD::`cat last-build`
 
   nightly-build:
-    if: github.sha == last_build
+    if: env.LAST_BUILD == github.sha
     runs-on: ${{ matrix.os.imageName }}
     strategy:
       matrix:
@@ -84,7 +84,7 @@ jobs:
           path: target/release/libmenu.dylib
 
   nightly-export:
-    if: github.sha == last_build
+    if: env.LAST_BUILD == github.sha
     needs: ["nightly-build", "tests"]
     runs-on: ubuntu-latest
     name: Export Nightly Release
@@ -117,7 +117,7 @@ jobs:
           path: exports/MacOSX.zip
 
   fix-nightly-macos-dmg:
-    if: github.sha == last_build
+    if: env.LAST_BUILD == github.sha
     needs: ["nightly-export"]
     runs-on: macOS-latest
     name: Fix and Release MacOS Nightly
@@ -148,7 +148,7 @@ jobs:
           path: out/Komarowii.dmg
 
   upload-s3-and-update-gh-pages:
-    if: github.sha == last_build
+    if: env.LAST_BUILD == github.sha
     needs: ["fix-nightly-macos-dmg"]
     runs-on: ubuntu-latest
     name: Upload nightly to S3
