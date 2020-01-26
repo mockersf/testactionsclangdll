@@ -40,7 +40,24 @@ jobs:
       - name: Run tests
         run: cargo make --profile ci-static-code-analysis-tasks --env TARGET=${{matrix.os.target}} ci-flow
 
+  check-last-build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v1
+      - name: get last-build
+        continue-on-error: true
+        uses: wei/wget@v1
+        with:
+          args: -O last-build ${{ secrets.AWS_S3_ENDPOINT }}/${{ secrets.AWS_S3_BUCKET }}/last-build
+      - name: compare with last build
+        shell: |
+          echo $GITHUB_SHA
+          cat last-build
+
+          ::set-env name=last_build::`cat last-build`
+
   nightly-build:
+    if: ${{ github.sha }} == $last_build
     runs-on: ${{ matrix.os.imageName }}
     strategy:
       matrix:
@@ -66,6 +83,7 @@ jobs:
           path: target/release/libmenu.dylib
 
   nightly-export:
+    if: ${{ github.sha }} == $last_build
     needs: ["nightly-build", "tests"]
     runs-on: ubuntu-latest
     name: Export Nightly Release
@@ -98,6 +116,7 @@ jobs:
           path: exports/MacOSX.zip
 
   fix-nightly-macos-dmg:
+    if: ${{ github.sha }} == $last_build
     needs: ["nightly-export"]
     runs-on: macOS-latest
     name: Fix and Release MacOS Nightly
@@ -128,6 +147,7 @@ jobs:
           path: out/Komarowii.dmg
 
   upload-s3-and-update-gh-pages:
+    if: ${{ github.sha }} == $last_build
     needs: ["fix-nightly-macos-dmg"]
     runs-on: ubuntu-latest
     name: Upload nightly to S3
@@ -142,10 +162,12 @@ jobs:
         shell: bash
         run: |
           date=`date "+%Y-%m-%d"`
-          mv nightly-macos-dmg/Komarowii.dmg nightly-macos-dmg/Komarowii-$date.dmg
+          version=`git describe --always`
+          mv nightly-macos-dmg/Komarowii.dmg nightly-macos-dmg/Komarowii-$date-$version.dmg
+          echo $GITHUB_SHA > nightly-macos-dmg/last-build
 
           mkdir gh-pages
-          echo "<html><body><a href=\"https://cellar-c2.services.clever-cloud.com/nightly/Komarowii-$date.dmg\">Komarowii-$date.dmg</a></body></html>" > gh-pages/index.html
+          echo "<html><body><a href=\"${{ secrets.AWS_S3_ENDPOINT }}/${{ secrets.AWS_S3_BUCKET }}/Komarowii-$date-$version.dmg\">Komarowii-$date-$version.dmg</a></body></html>" > gh-pages/index.html
       - name: upload to s3
         uses: jakejarvis/s3-sync-action@master
         with:
