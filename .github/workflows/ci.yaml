@@ -81,7 +81,7 @@ jobs:
           echo $GITHUB_SHA
           cat last-build/last-build
 
-          ::set-env name=LAST_BUILD::`cat last-build/last-build || echo "none"`
+          echo "::set-env name=LAST_BUILD::`cat last-build/last-build`"
       - uses: actions-rs/toolchain@v1
         if: env.LAST_BUILD != github.sha
         with:
