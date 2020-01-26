@@ -75,8 +75,7 @@ jobs:
         if: env.LAST_BUILD == github.sha
         run: cargo make build-release
       - name: Upload release library (macOS)
-        if: env.LAST_BUILD == github.sha
-        if: runner.os == 'macOS'
+        if: env.LAST_BUILD == github.sha && runner.os == 'macOS'
         uses: actions/upload-artifact@v1
         with:
           name: libs
