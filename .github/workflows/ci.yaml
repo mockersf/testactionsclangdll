@@ -50,7 +50,8 @@ jobs:
         with:
           args: -O last-build ${{ secrets.AWS_S3_ENDPOINT }}/${{ secrets.AWS_S3_BUCKET }}/last-build
       - name: compare with last build
-        shell: |
+        shell: bash
+        run: |
           echo $GITHUB_SHA
           cat last-build
 
