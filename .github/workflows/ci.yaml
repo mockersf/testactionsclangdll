@@ -49,7 +49,7 @@ jobs:
         continue-on-error: true
         uses: wei/wget@v1
         with:
-          args: -O last-build ${{ secrets.AWS_S3_ENDPOINT }}/${{ secrets.AWS_S3_BUCKET }}/last-build
+          args: -O last-build ${{ secrets.AWS_S3_ENDPOINT }}${{ secrets.AWS_S3_BUCKET }}/last-build
       - name: compare with last build
         shell: bash
         run: |
@@ -230,7 +230,7 @@ jobs:
           echo $GITHUB_SHA > nightly-macos-dmg/last-build
 
           mkdir gh-pages
-          echo "<html><body><a href=\"${{ secrets.AWS_S3_ENDPOINT }}/${{ secrets.AWS_S3_BUCKET }}/Komarowii-$date-$version.dmg\">Komarowii-$date-$version.dmg</a></body></html>" > gh-pages/index.html
+          echo "<html><body><a href=\"${{ secrets.AWS_S3_ENDPOINT }}${{ secrets.AWS_S3_BUCKET }}/Komarowii-$date-$version.dmg\">Komarowii-$date-$version.dmg</a></body></html>" > gh-pages/index.html
       - name: upload to s3
         if: env.LAST_BUILD != github.sha
         uses: jakejarvis/s3-sync-action@master
