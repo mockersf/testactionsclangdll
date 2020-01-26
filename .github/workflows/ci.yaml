@@ -59,9 +59,9 @@ jobs:
         shell: bash
         run: |
           echo $GITHUB_SHA
-          cat last-build
+          cat last-build || echo "none"
 
-          ::set-env name=LAST_BUILD::`cat last-build`
+          ::set-env name=LAST_BUILD::`cat last-build || echo "none"`
       - uses: actions-rs/toolchain@v1
         if: env.LAST_BUILD == github.sha
         with:
@@ -95,9 +95,9 @@ jobs:
         shell: bash
         run: |
           echo $GITHUB_SHA
-          cat last-build
+          cat last-build || echo "none"
 
-          ::set-env name=LAST_BUILD::`cat last-build`
+          ::set-env name=LAST_BUILD::`cat last-build || echo "none"`
       - name: checkout
         if: env.LAST_BUILD == github.sha
         uses: actions/checkout@v2.0.0
@@ -144,9 +144,9 @@ jobs:
         shell: bash
         run: |
           echo $GITHUB_SHA
-          cat last-build
+          cat last-build || echo "none"
 
-          ::set-env name=LAST_BUILD::`cat last-build`
+          ::set-env name=LAST_BUILD::`cat last-build || echo "none"`
       - name: checkout
         if: env.LAST_BUILD == github.sha
         uses: actions/checkout@v2.0.0
@@ -190,9 +190,9 @@ jobs:
         shell: bash
         run: |
           echo $GITHUB_SHA
-          cat last-build
+          cat last-build || echo "none"
 
-          ::set-env name=LAST_BUILD::`cat last-build`
+          ::set-env name=LAST_BUILD::`cat last-build || echo "none"`
       - name: Checkout
         if: env.LAST_BUILD == github.sha
         uses: actions/checkout@v1
