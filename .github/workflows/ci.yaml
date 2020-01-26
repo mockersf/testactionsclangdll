@@ -40,6 +40,26 @@ jobs:
       - name: Run tests
         run: cargo make --profile ci-static-code-analysis-tasks --env TARGET=${{matrix.os.target}} ci-flow
 
+  get-last-build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: get-last-build
+        continue-on-error: true
+        uses: wei/wget@v1
+        with:
+          args: -O last-build ${{ secrets.AWS_S3_ENDPOINT }}/${{ secrets.AWS_S3_BUCKET }}/last-build
+      - name: compare with last build
+        shell: bash
+        run: |
+          cat last-build || echo "none" > last-build
+
+          ::set-env name=LAST_BUILD::`cat last-build || echo "none"`
+      - name: Upload release library (macOS)
+        uses: actions/upload-artifact@v1
+        with:
+          name: last-build
+          path: last-build
+
   nightly-build:
     runs-on: ${{ matrix.os.imageName }}
     strategy:
@@ -50,18 +70,17 @@ jobs:
             target: x86_64-apple-darwin
             profile: mac
     steps:
-      - name: get last-build
-        continue-on-error: true
-        uses: wei/wget@v1
+      - name: Download last-build
+        uses: actions/download-artifact@v1
         with:
-          args: -O last-build ${{ secrets.AWS_S3_ENDPOINT }}/${{ secrets.AWS_S3_BUCKET }}/last-build
+          name: last-build
       - name: compare with last build
         shell: bash
         run: |
           echo $GITHUB_SHA
-          cat last-build || echo "none"
+          cat last-build/last-build
 
-          ::set-env name=LAST_BUILD::`cat last-build || echo "none"`
+          ::set-env name=LAST_BUILD::`cat last-build/last-build || echo "none"`
       - uses: actions-rs/toolchain@v1
         if: env.LAST_BUILD != github.sha
         with:
@@ -86,18 +105,17 @@ jobs:
     runs-on: ubuntu-latest
     name: Export Nightly Release
     steps:
-      - name: get last-build
-        continue-on-error: true
-        uses: wei/wget@v1
+      - name: Download last-build
+        uses: actions/download-artifact@v1
         with:
-          args: -O last-build ${{ secrets.AWS_S3_ENDPOINT }}/${{ secrets.AWS_S3_BUCKET }}/last-build
+          name: last-build
       - name: compare with last build
         shell: bash
         run: |
           echo $GITHUB_SHA
-          cat last-build || echo "none"
+          cat last-build/last-build
 
-          ::set-env name=LAST_BUILD::`cat last-build || echo "none"`
+          ::set-env name=LAST_BUILD::`cat last-build/last-build || echo "none"`
       - name: checkout
         if: env.LAST_BUILD != github.sha
         uses: actions/checkout@v2.0.0
@@ -135,18 +153,17 @@ jobs:
     runs-on: macOS-latest
     name: Fix and Release MacOS Nightly
     steps:
-      - name: get last-build
-        continue-on-error: true
-        uses: wei/wget@v1
+      - name: Download last-build
+        uses: actions/download-artifact@v1
         with:
-          args: -O last-build ${{ secrets.AWS_S3_ENDPOINT }}/${{ secrets.AWS_S3_BUCKET }}/last-build
+          name: last-build
       - name: compare with last build
         shell: bash
         run: |
           echo $GITHUB_SHA
-          cat last-build || echo "none"
+          cat last-build/last-build
 
-          ::set-env name=LAST_BUILD::`cat last-build || echo "none"`
+          ::set-env name=LAST_BUILD::`cat last-build/last-build || echo "none"`
       - name: checkout
         if: env.LAST_BUILD != github.sha
         uses: actions/checkout@v2.0.0
@@ -181,18 +198,17 @@ jobs:
     runs-on: ubuntu-latest
     name: Upload nightly to S3
     steps:
-      - name: get last-build
-        continue-on-error: true
-        uses: wei/wget@v1
+      - name: Download last-build
+        uses: actions/download-artifact@v1
         with:
-          args: -O last-build ${{ secrets.AWS_S3_ENDPOINT }}/${{ secrets.AWS_S3_BUCKET }}/last-build
+          name: last-build
       - name: compare with last build
         shell: bash
         run: |
           echo $GITHUB_SHA
-          cat last-build || echo "none"
+          cat last-build/last-build
 
-          ::set-env name=LAST_BUILD::`cat last-build || echo "none"`
+          ::set-env name=LAST_BUILD::`cat last-build/last-build || echo "none"`
       - name: Checkout
         if: env.LAST_BUILD != github.sha
         uses: actions/checkout@v1
