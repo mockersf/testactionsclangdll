@@ -63,19 +63,19 @@ jobs:
 
           ::set-env name=LAST_BUILD::`cat last-build || echo "none"`
       - uses: actions-rs/toolchain@v1
-        if: env.LAST_BUILD == github.sha
+        if: env.LAST_BUILD != github.sha
         with:
           toolchain: ${{ matrix.rust_toolchain }}
           override: true
       - uses: davidB/rust-cargo-make@v1
-        if: env.LAST_BUILD == github.sha
+        if: env.LAST_BUILD != github.sha
       - uses: actions/checkout@v1
-        if: env.LAST_BUILD == github.sha
+        if: env.LAST_BUILD != github.sha
       - name: Build release
-        if: env.LAST_BUILD == github.sha
+        if: env.LAST_BUILD != github.sha
         run: cargo make build-release
       - name: Upload release library (macOS)
-        if: env.LAST_BUILD == github.sha && runner.os == 'macOS'
+        if: env.LAST_BUILD != github.sha && runner.os == 'macOS'
         uses: actions/upload-artifact@v1
         with:
           name: libs
@@ -99,21 +99,21 @@ jobs:
 
           ::set-env name=LAST_BUILD::`cat last-build || echo "none"`
       - name: checkout
-        if: env.LAST_BUILD == github.sha
+        if: env.LAST_BUILD != github.sha
         uses: actions/checkout@v2.0.0
       - name: Download libraries
-        if: env.LAST_BUILD == github.sha
+        if: env.LAST_BUILD != github.sha
         uses: actions/download-artifact@v1
         with:
           name: libs
       - name: Setup libraries in expected folder
-        if: env.LAST_BUILD == github.sha
+        if: env.LAST_BUILD != github.sha
         shell: bash
         run: |
           mkdir -p target/release
           mv libs/libmenu.* target/release/
       - name: Export Game
-        if: env.LAST_BUILD == github.sha
+        if: env.LAST_BUILD != github.sha
         uses: firebelley/godot-export@v1.1.0
         with:
           godot_executable_download_url: https://downloads.tuxfamily.org/godotengine/3.2/rc2/Godot_v3.2-rc2_linux_headless.64.zip
@@ -124,7 +124,7 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - name: Upload nightly build (macOS)
-        if: env.LAST_BUILD == github.sha
+        if: env.LAST_BUILD != github.sha
         uses: actions/upload-artifact@v1
         with:
           name: nightly-macos
@@ -148,15 +148,15 @@ jobs:
 
           ::set-env name=LAST_BUILD::`cat last-build || echo "none"`
       - name: checkout
-        if: env.LAST_BUILD == github.sha
+        if: env.LAST_BUILD != github.sha
         uses: actions/checkout@v2.0.0
       - name: Download nightly macos build
-        if: env.LAST_BUILD == github.sha
+        if: env.LAST_BUILD != github.sha
         uses: actions/download-artifact@v1
         with:
           name: nightly-macos
       - name: Fix MacOSX export permissions and save as dmg
-        if: env.LAST_BUILD == github.sha
+        if: env.LAST_BUILD != github.sha
         shell: bash
         run: |
           mkdir tmp
@@ -170,7 +170,7 @@ jobs:
           hdiutil create tmp.dmg -ov -volname "Komarowii" -fs HFS+ -srcfolder "tmp"
           hdiutil convert tmp.dmg -format UDZO -o out/Komarowii.dmg
       - name: Upload nightly dmg build (macOS)
-        if: env.LAST_BUILD == github.sha
+        if: env.LAST_BUILD != github.sha
         uses: actions/upload-artifact@v1
         with:
           name: nightly-macos-dmg
@@ -194,15 +194,15 @@ jobs:
 
           ::set-env name=LAST_BUILD::`cat last-build || echo "none"`
       - name: Checkout
-        if: env.LAST_BUILD == github.sha
+        if: env.LAST_BUILD != github.sha
         uses: actions/checkout@v1
       - name: Download nightly macos build
-        if: env.LAST_BUILD == github.sha
+        if: env.LAST_BUILD != github.sha
         uses: actions/download-artifact@v1
         with:
           name: nightly-macos-dmg
       - name: Set artifact name with date and prepare html
-        if: env.LAST_BUILD == github.sha
+        if: env.LAST_BUILD != github.sha
         shell: bash
         run: |
           date=`date "+%Y-%m-%d"`
@@ -213,7 +213,7 @@ jobs:
           mkdir gh-pages
           echo "<html><body><a href=\"${{ secrets.AWS_S3_ENDPOINT }}/${{ secrets.AWS_S3_BUCKET }}/Komarowii-$date-$version.dmg\">Komarowii-$date-$version.dmg</a></body></html>" > gh-pages/index.html
       - name: upload to s3
-        if: env.LAST_BUILD == github.sha
+        if: env.LAST_BUILD != github.sha
         uses: jakejarvis/s3-sync-action@master
         with:
           args: --acl public-read --delete
@@ -224,14 +224,14 @@ jobs:
           AWS_S3_ENDPOINT: ${{ secrets.AWS_S3_ENDPOINT }}
           SOURCE_DIR: "nightly-macos-dmg"
       - name: Deploy
-        if: env.LAST_BUILD == github.sha
+        if: env.LAST_BUILD != github.sha
         uses: JamesIves/github-pages-deploy-action@releases/v3
         with:
           BRANCH: gh-pages
           FOLDER: gh-pages
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - name: Request Github Pages build job
-        if: env.LAST_BUILD == github.sha
+        if: env.LAST_BUILD != github.sha
         run: >-
           curl -L -X POST 
           -H "Content-Type: application/json"
