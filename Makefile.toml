@@ -1,0 +1,108 @@
+[env]
+ENDLESS_SKY_VERSION = "0.9.10"
+
+[tasks.install-deny]
+description = "Installs cargo deny."
+category = "Test"
+install_crate = { crate_name = "cargo-deny", binary = "cargo-deny", test_arg = "--help" }
+args = [ "deny", "--help" ]
+
+[tasks.dependencies-deny]
+description = "Runs cargo deny."
+category = "Test"
+workspace = false
+dependencies = [
+    "install-deny"
+]
+command = "cargo"
+args = ["deny", "check"]
+
+[tasks.install-bom]
+description = "Installs cargo bom."
+category = "Test"
+install_crate = { crate_name = "cargo-bom", binary = "cargo-bom", test_arg = "--help" }
+args = [ "bom", "--help" ]
+
+[tasks.download-es]
+description = "Download target version of Endless Sky"
+category = "Publish"
+workspace = false
+condition = { files_not_exist = ["${CARGO_MAKE_WORKING_DIRECTORY}/endless-sky-${ENDLESS_SKY_VERSION}.zip"] }
+script = [
+    '''
+    wget -O endless-sky-${ENDLESS_SKY_VERSION}.zip https://github.com/endless-sky/endless-sky/archive/v${ENDLESS_SKY_VERSION}.zip
+    unzip endless-sky-${ENDLESS_SKY_VERSION}.zip
+    '''
+]
+
+[tasks.prepare-es]
+description = "Prepare Endless Sky files to be reused"
+category = "Publish"
+workspace = false
+dependencies = [
+    "download-es",
+]
+script = [
+    '''
+    cp endless-sky-${ENDLESS_SKY_VERSION}/data/* data/
+    cp -r endless-sky-${ENDLESS_SKY_VERSION}/images/ images
+    '''
+]
+
+[tasks.cleanup-es]
+description = "Download target version of Endless Sky"
+category = "Publish"
+workspace = false
+condition = { files_exist = ["${CARGO_MAKE_WORKING_DIRECTORY}/endless-sky-${ENDLESS_SKY_VERSION}.zip"] }
+script = [
+    '''
+    rm -rf endless-sky-${ENDLESS_SKY_VERSION}.zip endless-sky-${ENDLESS_SKY_VERSION}
+    '''
+]
+
+[tasks.bom-es]
+description = "Get informations from Endless Sky"
+category = "Publish"
+workspace = false
+dependencies = [
+    "download-es",
+]
+script = [
+    '''
+    cat "endless-sky-${ENDLESS_SKY_VERSION}/credits.txt" > BOM-ES.txt
+    echo "=======\n" >> BOM-ES.txt
+    cat "endless-sky-${ENDLESS_SKY_VERSION}/copyright" >> BOM-ES.txt
+    echo "=======\n" >> BOM-ES.txt
+    for i in endless-sky-${ENDLESS_SKY_VERSION}/data/*
+    do
+        echo Endless-Sky/`basename $i` >> BOM-ES.txt
+        head -n 20 "$i" | grep '#' >> BOM-ES.txt
+        echo "=======\n" >> BOM-ES.txt
+    done
+    '''
+]
+
+[tasks.bom]
+description = "Runs cargo bom."
+category = "Publish"
+workspace = false
+dependencies = [
+    "install-bom",
+    "bom-es",
+]
+script = [
+  '''
+  cargo bom > BOM.txt
+  cat BOM-ES.txt >> BOM.txt
+  '''
+]
+
+[task.prepare-release]
+description = "Prepare release by copying data and setting up BOM"
+category = "Publish"
+workspace = false
+dependencies = [
+    "prepare-es",
+    "bom",
+    "cleeanup-es"
+]

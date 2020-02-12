@@ -3,6 +3,8 @@
 use gdnative::*;
 use rand::Rng;
 
+use helpers::{max, min, stringify_fn};
+
 /// probability a star will die
 const DEATH_PROBABILITY: f32 = 0.00001;
 /// probability a star will change brightness
@@ -10,8 +12,10 @@ const CHANGE_PROBABILITY: f32 = 0.05;
 /// how much should we change star's color's alpha
 const ALPHA_CHANGE: f32 = 0.05;
 
+type OwnerNode = Node2D;
+
 #[derive(NativeClass)]
-#[inherit(Node2D)]
+#[inherit(OwnerNode)]
 pub struct Star {
     rng: rand::rngs::ThreadRng,
 }
@@ -20,18 +24,18 @@ unsafe impl Send for Star {}
 
 #[methods]
 impl Star {
-    fn _init(_owner: Node2D) -> Self {
+    fn _init(_owner: OwnerNode) -> Self {
         Star {
             rng: rand::thread_rng(),
         }
     }
 
     #[export]
-    fn _ready(&mut self, owner: Node2D) {
+    fn _ready(&mut self, owner: OwnerNode) {
         unsafe {
             if let Some(mut visi) = owner.get_node("Star/VisibilityNotifier2D".into()) {
                 visi.connect(
-                    crate::Signal::ScreenExited.into(),
+                    helpers::Signal::ScreenExited.into(),
                     Some(owner.to_object()),
                     stringify_fn!(Self, _on_visibility_screen_exited),
                     VariantArray::new(),
@@ -43,7 +47,7 @@ impl Star {
     }
 
     #[export]
-    fn _process(&mut self, mut owner: Node2D, _delta: f32) {
+    fn _process(&mut self, mut owner: OwnerNode, _delta: f32) {
         let proba = self.rng.gen_range(0.0, 1.0);
         // should this star die
         if proba < DEATH_PROBABILITY {
@@ -71,7 +75,7 @@ impl Star {
     }
 
     #[export]
-    fn _on_visibility_screen_exited(&mut self, mut owner: Node2D) {
+    fn _on_visibility_screen_exited(&mut self, mut owner: OwnerNode) {
         unsafe {
             owner.queue_free();
         }

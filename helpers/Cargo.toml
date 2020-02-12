@@ -1,18 +1,12 @@
 [package]
-name = "menu"
+name = "helpers"
 version = "0.1.0"
 authors = ["François Mockers <mockersf@gmail.com>"]
 edition = "2018"
 publish = false
 license = "MIT"
 
-[lib]
-crate-type = ["cdylib"]
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-# gdnative = "0.7"
 gdnative = { git = "https://github.com/GodotNativeTools/godot-rust" }
-euclid = "0.20"
-rand = "0.7.3"
-
-helpers = { path = "../helpers" }

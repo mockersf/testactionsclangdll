@@ -1,0 +1,18 @@
+[general]
+
+singleton=false
+load_once=false
+symbol_prefix="godot_"
+reloadable=true
+
+[entry]
+
+OSX.64="res://target/release/libgame.dylib"
+X11.64="res://target/release/libgame.so"
+Windows.64="res://target/release/libgame.dll"
+
+[dependencies]
+
+OSX.64=[  ]
+UWP.64=[  ]
+X11.64=[  ]

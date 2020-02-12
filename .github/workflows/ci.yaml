@@ -6,135 +6,62 @@ on:
     branches:
       - master
       - "releases/*"
-  schedule:
-    - cron: "*/15 * * * *"
 
 jobs:
   tests:
-    runs-on: ${{ matrix.os.imageName }}
-    strategy:
-      matrix:
-        rust_toolchain: ["stable"]
-        os:
-          - imageName: ubuntu-18.04
-            target: x86_64-unknown-linux-gnu
-            profile: linux
-            # - imageName: "macOS-latest"
-            #   target: x86_64-apple-darwin
-            #   profile: mac
-            # - imageName: "windows-2019"
-            #   target: x86_64-pc-windows-msvc
-            #   profile: windows
+    runs-on: ubuntu-latest
     steps:
       - uses: actions-rs/toolchain@v1
         with:
-          toolchain: ${{ matrix.rust_toolchain }}
+          toolchain: stable
           override: true
-      - name: Install llvm on Windows
-        if: runner.os == 'Windows'
-        shell: powershell
-        run: |
-          Invoke-Expression (New-Object System.Net.WebClient).DownloadString('https://get.scoop.sh')
-          scoop install llvm --global
-          echo "::set-env name=LIBCLANG_PATH::C:\ProgramData\scoop\apps\llvm\current\bin"
       - uses: davidB/rust-cargo-make@v1
       - uses: actions/checkout@v1
       - name: Run tests
         run: cargo make --profile ci-static-code-analysis-tasks --env TARGET=${{matrix.os.target}} ci-flow
 
-  get-last-build:
-    runs-on: ubuntu-latest
+  build-as-release-macOS:
+    runs-on: macOS-latest
     steps:
-      - name: get-last-build
-        continue-on-error: true
-        uses: wei/wget@v1
-        with:
-          args: -O last-build ${{ secrets.AWS_S3_ENDPOINT }}${{ secrets.AWS_S3_BUCKET }}/last-build
-      - name: compare with last build
-        shell: bash
-        run: |
-          cat last-build || echo "none" > last-build
-
-          echo "::set-env name=LAST_BUILD::`cat last-build`"
-      - name: Upload release library (macOS)
-        uses: actions/upload-artifact@v1
-        with:
-          name: last-build
-          path: last-build
-
-  nightly-build:
-    runs-on: ${{ matrix.os.imageName }}
-    needs: ["get-last-build"]
-    strategy:
-      matrix:
-        rust_toolchain: ["stable"]
-        os:
-          - imageName: "macOS-latest"
-            target: x86_64-apple-darwin
-            profile: mac
-    steps:
-      - name: Download last-build
-        uses: actions/download-artifact@v1
-        with:
-          name: last-build
-      - name: compare with last build
-        shell: bash
-        run: |
-          echo $GITHUB_SHA
-          cat last-build/last-build
-
-          echo "::set-env name=LAST_BUILD::`cat last-build/last-build`"
       - uses: actions-rs/toolchain@v1
-        if: env.LAST_BUILD != github.sha
         with:
-          toolchain: ${{ matrix.rust_toolchain }}
+          toolchain: stable
           override: true
       - uses: davidB/rust-cargo-make@v1
-        if: env.LAST_BUILD != github.sha
       - uses: actions/checkout@v1
-        if: env.LAST_BUILD != github.sha
       - name: Build release
-        if: env.LAST_BUILD != github.sha
         run: cargo make build-release
+      - name: Prepare libraries for artifact upload
+        shell: bash
+        run: |
+          mkdir -p libs-macos
+          mv target/release/*.dylib libs-macos
       - name: Upload release library (macOS)
-        if: env.LAST_BUILD != github.sha && runner.os == 'macOS'
         uses: actions/upload-artifact@v1
         with:
-          name: libs
-          path: target/release/libmenu.dylib
+          name: libs-macos
+          path: libs-macos
 
-  nightly-export:
-    needs: ["nightly-build", "tests", "get-last-build"]
+  export:
+    needs: ["build-as-release-macOS", "tests"]
     runs-on: ubuntu-latest
     name: Export Nightly Release
     steps:
-      - name: Download last-build
-        uses: actions/download-artifact@v1
-        with:
-          name: last-build
-      - name: compare with last build
-        shell: bash
-        run: |
-          echo $GITHUB_SHA
-          cat last-build/last-build
-
-          echo "::set-env name=LAST_BUILD::`cat last-build/last-build`"
+      - uses: davidB/rust-cargo-make@v1
       - name: checkout
-        if: env.LAST_BUILD != github.sha
         uses: actions/checkout@v2.0.0
       - name: Download libraries
-        if: env.LAST_BUILD != github.sha
         uses: actions/download-artifact@v1
         with:
-          name: libs
+          name: libs-macos
       - name: Setup libraries in expected folder
-        if: env.LAST_BUILD != github.sha
         shell: bash
         run: |
           mkdir -p target/release
-          mv libs/libmenu.* target/release/
+          mv libs-macos/* target/release/
+      - name: Download and set up endless sky data
+        run: cargo make prepare-es
       - name: Export Game
-        if: env.LAST_BUILD != github.sha
         uses: firebelley/godot-export@v1.1.0
         with:
           godot_executable_download_url: https://downloads.tuxfamily.org/godotengine/3.2/rc2/Godot_v3.2-rc2_linux_headless.64.zip
@@ -145,38 +72,23 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - name: Upload nightly build (macOS)
-        if: env.LAST_BUILD != github.sha
         uses: actions/upload-artifact@v1
         with:
           name: nightly-macos
           path: exports/MacOSX.zip
 
-  fix-nightly-macos-dmg:
-    needs: ["nightly-export", "get-last-build"]
+  fix-macos-release-as-dmg:
+    needs: ["export"]
     runs-on: macOS-latest
     name: Fix and Release MacOS Nightly
     steps:
-      - name: Download last-build
-        uses: actions/download-artifact@v1
-        with:
-          name: last-build
-      - name: compare with last build
-        shell: bash
-        run: |
-          echo $GITHUB_SHA
-          cat last-build/last-build
-
-          echo "::set-env name=LAST_BUILD::`cat last-build/last-build`"
       - name: checkout
-        if: env.LAST_BUILD != github.sha
         uses: actions/checkout@v2.0.0
       - name: Download nightly macos build
-        if: env.LAST_BUILD != github.sha
         uses: actions/download-artifact@v1
         with:
           name: nightly-macos
       - name: Fix MacOSX export permissions and save as dmg
-        if: env.LAST_BUILD != github.sha
         shell: bash
         run: |
           mkdir tmp
@@ -190,49 +102,33 @@ jobs:
           hdiutil create tmp.dmg -ov -volname "Komarowii" -fs HFS+ -srcfolder "tmp"
           hdiutil convert tmp.dmg -format UDZO -o out/Komarowii.dmg
       - name: Upload nightly dmg build (macOS)
-        if: env.LAST_BUILD != github.sha
         uses: actions/upload-artifact@v1
         with:
           name: nightly-macos-dmg
           path: out/Komarowii.dmg
 
   upload-s3-and-update-gh-pages:
-    needs: ["fix-nightly-macos-dmg", "get-last-build"]
+    needs: ["fix-macos-release-as-dmg"]
     runs-on: ubuntu-latest
     name: Upload nightly to S3
     steps:
-      - name: Download last-build
-        uses: actions/download-artifact@v1
-        with:
-          name: last-build
-      - name: compare with last build
-        shell: bash
-        run: |
-          echo $GITHUB_SHA
-          cat last-build/last-build
-
-          echo "::set-env name=LAST_BUILD::`cat last-build/last-build`"
       - name: Checkout
-        if: env.LAST_BUILD != github.sha
         uses: actions/checkout@v1
       - name: Download nightly macos build
-        if: env.LAST_BUILD != github.sha
         uses: actions/download-artifact@v1
         with:
           name: nightly-macos-dmg
       - name: Set artifact name with date and prepare html
-        if: env.LAST_BUILD != github.sha
         shell: bash
         run: |
           date=`date "+%Y-%m-%d"`
           version=`git describe --always`
-          mv nightly-macos-dmg/Komarowii.dmg nightly-macos-dmg/Komarowii-$date-$version.dmg
+          mv nightly-macos-dmg/Komarowii.dmg nightly-macos-dmg/Komarowii-$date-$version-beta.dmg
           echo $GITHUB_SHA > nightly-macos-dmg/last-build
 
           mkdir gh-pages
-          echo "<html><body><a href=\"${{ secrets.AWS_S3_ENDPOINT }}${{ secrets.AWS_S3_BUCKET }}/Komarowii-$date-$version.dmg\">Komarowii-$date-$version.dmg</a></body></html>" > gh-pages/index.html
+          echo "<html><body><a href=\"${{ secrets.AWS_S3_ENDPOINT }}${{ secrets.AWS_S3_BUCKET }}/Komarowii-$date-$version-beta.dmg\">Komarowii-$date-$version-beta.dmg</a></body></html>" > gh-pages/index.html
       - name: upload to s3
-        if: env.LAST_BUILD != github.sha
         uses: jakejarvis/s3-sync-action@master
         with:
           args: --acl public-read --delete
@@ -243,14 +139,12 @@ jobs:
           AWS_S3_ENDPOINT: ${{ secrets.AWS_S3_ENDPOINT }}
           SOURCE_DIR: "nightly-macos-dmg"
       - name: Deploy
-        if: env.LAST_BUILD != github.sha
         uses: JamesIves/github-pages-deploy-action@releases/v3
         with:
           BRANCH: gh-pages
           FOLDER: gh-pages
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - name: Request Github Pages build job
-        if: env.LAST_BUILD != github.sha
         run: >-
           curl -L -X POST 
           -H "Content-Type: application/json"

@@ -1,6 +1,6 @@
 [gd_scene load_steps=2 format=2]
 
-[ext_resource path="res://menu/MainMenu.gd" type="Script" id=1]
+[ext_resource path="res://menu/MainMenu.gdns" type="Script" id=1]
 
 [node name="Control" type="Control"]
 anchor_right = 1.0
@@ -10,6 +10,7 @@ margin_bottom = 0.609131
 script = ExtResource( 1 )
 
 [node name="Background" type="Control" parent="."]
+editor/display_folded = true
 anchor_right = 1.0
 anchor_bottom = 1.0
 
@@ -34,6 +35,7 @@ margin_bottom = 214.0
 alignment = 1
 
 [node name="MarginContainer" type="MarginContainer" parent="Menu"]
+editor/display_folded = true
 margin_right = 100.0
 margin_bottom = 200.0
 
@@ -62,4 +64,3 @@ margin_bottom = 428.0
 margin_right = 100.0
 margin_bottom = 20.0
 text = "New Game"
-[connection signal="pressed" from="Menu/MarginContainer2/Start" to="." method="go_to_game"]

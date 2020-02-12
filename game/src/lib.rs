@@ -16,12 +16,12 @@
 
 use gdnative::*;
 
-mod menu;
-mod star;
+mod game;
+mod stellar_object;
 
 fn init(handle: gdnative::init::InitHandle) {
-    handle.add_class::<star::Star>();
-    handle.add_class::<menu::Menu>();
+    handle.add_class::<game::Game>();
+    handle.add_class::<stellar_object::StellarObject>();
 }
 
 godot_gdnative_init!();

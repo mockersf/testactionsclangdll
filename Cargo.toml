@@ -1,6 +1,10 @@
 [workspace]
 
 members = [
+    "helpers",
     "menu",
+    "game",
+    "es_data_parser",
+    "game_data",
 ]
 
