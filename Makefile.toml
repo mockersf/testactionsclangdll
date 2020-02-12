@@ -44,7 +44,7 @@ dependencies = [
 ]
 script = [
     '''
-    cp endless-sky-${ENDLESS_SKY_VERSION}/data/* data/
+    cp endless-sky-${ENDLESS_SKY_VERSION}/data/ data
     cp -r endless-sky-${ENDLESS_SKY_VERSION}/images/ images
     '''
 ]
