@@ -104,5 +104,5 @@ workspace = false
 dependencies = [
     "prepare-es",
     "bom",
-    "cleeanup-es"
+    "cleanup-es"
 ]
