@@ -96,7 +96,7 @@ script = [
   '''
 ]
 
-[task.prepare-release]
+[tasks.prepare-release]
 description = "Prepare release by copying data and setting up BOM"
 category = "Publish"
 workspace = false
