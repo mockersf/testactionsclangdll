@@ -1,0 +1,136 @@
+start
+	date 16 11 3013
+	system "Rutilicus"
+	planet "New Boston"
+	account
+		credits 480000
+		score 400
+		mortgage Mortgage
+			principal 480000
+			interest 0.004
+			term 365
+	set "license: Pilot's"
+
+system Rutilicus
+    pos -535 273
+    government Republic
+    habitable 625
+    belt 1771
+    link Arcturus
+    link Cebalrai
+    link Menkent
+    link Holeb
+    asteroids "small rock" 1 1.9188
+    asteroids "medium rock" 10 1.9656
+    asteroids "large rock" 1 2.0358
+    asteroids "small metal" 13 1.4742
+    asteroids "medium metal" 50 1.2168
+    asteroids "large metal" 1 2.2932
+    minables copper 7 2.11726
+    minables lead 14 2.22127
+    minables titanium 9 1.47159
+    trade Clothing 224
+    trade Electronics 838
+    trade Equipment 560
+    trade Food 335
+    trade "Heavy Metals" 916
+    trade Industrial 792
+    trade "Luxury Goods" 1171
+    trade Medical 590
+    trade Metal 468
+    trade Plastic 415
+    fleet "Small Southern Merchants" 600
+    fleet "Large Southern Merchants" 2000
+    fleet "Small Militia" 6000
+    fleet "Human Miners" 3000
+    object
+        sprite star/g5
+        period 10
+    object
+        sprite planet/rock6
+        distance 158.61
+        period 31.9607
+    object "New Boston"
+        sprite planet/cloud6
+        distance 513.86
+        period 186.375
+    object
+        sprite planet/rock13-b
+        distance 864.75
+        period 406.87
+    object
+        sprite planet/gas14
+        distance 1503.91
+        period 933.153
+        object
+            sprite planet/ice7-b
+            distance 249
+            period 15.1366
+    object
+        sprite planet/gas16-b
+        distance 2597.32
+        period 2117.91
+        object
+            sprite planet/ganymede
+            distance 237
+            period 17.9839
+        object
+            sprite planet/rock0
+            distance 356
+            period 33.1083
+
+planet "New Boston"
+    attributes "dirt belt" textiles farming
+    landscape land/water2
+    description `New Boston is a completely unremarkable world... except, of course, for the fact that you happen to have been born here. Most of the land is wet and marshy, and the coastal regions are prone to flooding. Some food crops are grown here, but most of the farmers instead plant flax and jute, which grow well in wet soil and are used to make linen and burlap cloth. The textile mills are hot and poorly ventilated, but they offer higher and more reliable income than farming.`
+    spaceport `Some day New Boston may be a prosperous enough planet to afford a better spaceport, but not yet. Many of the concrete landing pads have sunk into the muddy soil over the years since they were poured, and are now tilted and uneven. The market where ship captains buy and sell cargo is a large tent rather than a permanent building, but it is sturdy enough to keep off the rain, and high enough for loads to be brought in and out by trucks and the occasional hovercraft. And, some enterprising local mechanics have set up not only a repair shop and outfitter, but also a shipyard with several small, refurbished ships for sale.`
+    shipyard "Basic Ships"
+    outfitter "Basic Outfits"
+    outfitter "Ammo South"
+    security 0.05
+    tribute 300
+        threshold 2500
+        fleet "Small Militia" 23
+
+ship "Shuttle"
+    sprite "ship/shuttle"
+        "frame time" 4
+        "delay" 14
+        "random start frame"
+    thumbnail "thumbnail/shuttle"
+    attributes
+        category "Transport"
+        "cost" 180000
+        "shields" 500
+        "hull" 600
+        "required crew" 1
+        "bunks" 6
+        "mass" 70
+        "drag" 1.7
+        "heat dissipation" .8
+        "fuel capacity" 400
+        "cargo space" 20
+        "outfit space" 120
+        "weapon capacity" 10
+        "engine capacity" 60
+        weapon
+            "blast radius" 12
+            "shield damage" 120
+            "hull damage" 60
+            "hit force" 180
+    outfits
+        "nGVF-AA Fuel Cell"
+        "LP036a Battery Pack"
+        "D14-RN Shield Generator"
+        "X2700 Ion Thruster"
+        "X2200 Ion Steering"
+        "Hyperdrive"
+    engine -6 30
+    engine 6 30
+    gun 0 -31
+    leak "leak" 60 50
+    explode "tiny explosion" 10
+    explode "small explosion" 5
+    description "Although Betelgeuse Shipyards produces other ship models as well, the majority of their profits come from sales of the Shuttle. This versatile ship serves equally well as a passenger transport or a cargo courier. It also happens to be the cheapest ship you can buy which is capable of hyperspace travel."
+    description `   Shuttles are not designed to withstand combat of any sort, but they are fast and maneuverable enough to get out of harm's way if attacked by a larger, slower ship. Although they are typically unarmed, they have enough space for one weapon, which is the origin of the popular phrase, "as useless as a blaster cannon on a shuttlecraft."`
+
