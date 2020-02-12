@@ -60,7 +60,7 @@ jobs:
           mkdir -p target/release
           mv libs-macos/* target/release/
       - name: Download and set up endless sky data
-        run: cargo make prepare-es
+        run: cargo make prepare-release
       - name: Export Game
         uses: firebelley/godot-export@v1.1.0
         with:
