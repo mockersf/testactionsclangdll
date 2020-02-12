@@ -53,7 +53,6 @@ script = [
 description = "Download target version of Endless Sky"
 category = "Publish"
 workspace = false
-condition = { files_exist = ["${CARGO_MAKE_WORKING_DIRECTORY}/endless-sky-${ENDLESS_SKY_VERSION}.zip"] }
 script = [
     '''
     rm -rf endless-sky-${ENDLESS_SKY_VERSION}.zip endless-sky-${ENDLESS_SKY_VERSION}
